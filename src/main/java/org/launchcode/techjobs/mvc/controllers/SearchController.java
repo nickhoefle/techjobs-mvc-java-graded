@@ -29,15 +29,32 @@ public class SearchController {
     @PostMapping(value = "results")
     public String displaySearchResults(Model model, @RequestParam String searchType, @RequestParam String searchTerm) {
         ArrayList<Job> jobs;
-        if (!searchType.equals("all")) {
+        if (!searchType.equals("all") && !searchType.equals(null)) {
             jobs = JobData.findByColumnAndValue(searchType, searchTerm);
             model.addAttribute("jobs", jobs);
-            model.addAttribute("title", "All jobs");
+            model.addAttribute("title", "Jobs with " + columnChoices.get(searchType) + ": " + searchTerm);
             model.addAttribute("columns", columnChoices);
+            return "list-jobs";
         }
-        jobs = JobData.findAll();
-        model.addAttribute("jobs", jobs);
-        model.addAttribute("title", "Search Term: " + searchTerm + "Category: " + searchType);
-        return "results";
+        if (searchType.equals("all") && searchTerm.equals("all")) {
+            jobs = JobData.findAll();
+            model.addAttribute("jobs", jobs);
+            model.addAttribute("title", "All jobs" + "Search Term: " + searchTerm);
+        } else {
+            jobs = JobData.findAll();
+            ArrayList<Job> matchingJobs = new ArrayList<>();
+            for (int i =0; i<jobs.size(); i++){
+                if (jobs.get(i).toString().toUpperCase().contains(searchTerm.toUpperCase())){
+                    matchingJobs.add(jobs.get(i));
+                }
+            model.addAttribute("jobs", matchingJobs);
+            model.addAttribute("title", "All jobs" + "Search Term: " + searchTerm);
+            }
+        }
+
+
+
+
+        return "list-jobs";
     }
 }
